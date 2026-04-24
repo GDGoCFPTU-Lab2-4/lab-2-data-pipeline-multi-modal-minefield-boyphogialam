@@ -34,16 +34,60 @@ def main():
     
     output_path = os.path.join(os.path.dirname(SCRIPT_DIR), "processed_knowledge_base.json")
     # ----------------------------------------------
-
-    # TODO: Call each processing function (extract_pdf_data, clean_transcript, etc.)
-    # TODO: Run quality gates (run_quality_gate) before adding to final_kb
-    # TODO: Save final_kb to output_path using json.dump
     
-    # Example:
-    # doc = extract_pdf_data(pdf_path)
-    # if doc and run_quality_gate(doc):
-    #     final_kb.append(doc)
-
+    # Process PDF
+    print("Processing PDF...")
+    pdf_doc = extract_pdf_data(pdf_path)
+    if pdf_doc and run_quality_gate(pdf_doc):
+        final_kb.append(pdf_doc)
+        print("PDF processed and passed quality gate.")
+    else:
+        print("PDF processing failed or did not pass quality gate.")
+    
+    # Process Transcript
+    print("Processing Transcript...")
+    trans_doc = clean_transcript(trans_path)
+    if trans_doc and run_quality_gate(trans_doc):
+        final_kb.append(trans_doc)
+        print("Transcript processed and passed quality gate.")
+    else:
+        print("Transcript processing failed or did not pass quality gate.")
+    
+    # Process HTML
+    print("Processing HTML...")
+    html_docs = parse_html_catalog(html_path)
+    html_valid = 0
+    for doc in html_docs:
+        if run_quality_gate(doc):
+            final_kb.append(doc)
+            html_valid += 1
+    print(f"HTML processed: {html_valid}/{len(html_docs)} documents passed quality gate.")
+    
+    # Process CSV
+    print("Processing CSV...")
+    csv_docs = process_sales_csv(csv_path)
+    csv_valid = 0
+    for doc in csv_docs:
+        if run_quality_gate(doc):
+            final_kb.append(doc)
+            csv_valid += 1
+    print(f"CSV processed: {csv_valid}/{len(csv_docs)} documents passed quality gate.")
+    
+    # Process Legacy Code
+    print("Processing Legacy Code...")
+    code_doc = extract_logic_from_code(code_path)
+    if code_doc and run_quality_gate(code_doc):
+        final_kb.append(code_doc)
+        print("Legacy code processed and passed quality gate.")
+    else:
+        print("Legacy code processing failed or did not pass quality gate.")
+    
+    # Save final knowledge base to JSON
+    print(f"Saving {len(final_kb)} documents to {output_path}...")
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(final_kb, f, ensure_ascii=False, indent=2)
+    print("Save complete.")
+    
     end_time = time.time()
     print(f"Pipeline finished in {end_time - start_time:.2f} seconds.")
     print(f"Total valid documents stored: {len(final_kb)}")
